@@ -1,4 +1,4 @@
-#utils_lib
+## utils_lib
 
 A custom C library made up of standard and utility functions to help in the development of more complex programs.
 
