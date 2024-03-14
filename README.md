@@ -35,14 +35,15 @@ Once the library is compiled and linked with your project, you can use the provi
 
 Here's an example of how to include the library in your C file:
 
-	
-	`#include "libft.h"`
+	```c
+	#include "libft.h"
 
-	`int main() {`
-		`char *str = "Hello, world!";`
-		`ft_putstr(str);`
-		`return 0;`
-	`}`
+	int main() {
+		char *str = "Hello, world!";
+		ft_putstr(str);
+		return 0;
+	}
+	```
 
 
 
