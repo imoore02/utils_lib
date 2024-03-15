@@ -1,156 +1,137 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pbondoer <pbondoer@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2016/02/16 19:11:50 by pbondoer          #+#    #+#             */
+/*   Updated: 2017/02/02 20:30:05 by pbondoer         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "libft.h"
 #include "get_next_line.h"
-#include <stdio.h>
-#include <fcntl.h>
+#include <unistd.h>
 
-/*
-** Summary:
-**   This code defines a simple implementation of the get_next_line function
-**   that reads a text file line by line, allocating memory as needed.
-**   The code includes helper functions such as chopatendofline, readtxtfile,
-**   and a basic main function demonstrating the usage of get_next_line.
-*/
-
-/* -------------------------------------------------------------------------*/
-
-/*
-** chopatendofline
-** --------------------
-** Description:
-**   Truncates the input string 'unchopped' at the first occurrence of a newline character ('\n').
-**   Returns the remaining portion of 'unchopped' after the newline character, allocating memory for the result.
-**   Modifies 'unchopped' by null-terminating it at the newline character.
-**
-** Parameters:
-**   - unchopped: The input string to be truncated.
-**
-** Returns:
-**   - A newly allocated string containing the remaining portion of 'unchopped' after the newline character.
-**   - Returns NULL if 'unchopped' is NULL, empty, or if memory allocation fails.
-*/
-
-char	*chopatendofline(char	*unchopped)
+static char		*get_append(t_gnl *gnl)
 {
-	char	*choppedoff;
-	int		counter;
+	int i;
 
-	counter = 0;
-	while (unchopped[counter] != '\n' && unchopped[counter] != '\0')
-		counter++;
-	if (unchopped[counter] == '\0' || unchopped[1] == '\0')
-		return (NULL);
-	choppedoff = ft_substr(unchopped, counter + 1, ft_strlen(unchopped) - 1);
-	if (*choppedoff == '\0')
+	i = 0;
+	gnl->nl = 0;
+	while (gnl->i + i < gnl->count)
 	{
-		free (choppedoff);
-		choppedoff = NULL;
-	}
-	unchopped[counter + 1] = '\0';
-	return (choppedoff);
-}
-
-/*
-** readtxtfile
-** --------------------
-** Description:
-**   Reads data from the file descriptor 'fd' into 'bufferstring' until a newline character is encountered.
-**   Appends the read data to 'staticholderstring' and reallocates memory as needed.
-**   Continues reading until the end of the file or an error occurs.
-**
-** Parameters:
-**   - fd: The file descriptor to read from.
-**   - bufferstring: The buffer to store read data.
-**   - staticholderstring: The string to which read data is appended.
-**
-** Returns:
-**   - A pointer to 'staticholderstring' containing the read data.
-**   - Returns NULL on read error or memory allocation failure.
-*/
-
-char	*readtxtfile(int fd, char *bufferstring, char *staticholderstring)
-{
-	int		counter;
-	char	*holderstring;
-
-	counter = 1;
-	while (counter != 0)
-	{
-		counter = read(fd, bufferstring, BUFFER_SIZE);
-		if (counter == -1)
-			return (NULL);
-		else if (counter == 0)
+		if (gnl->buf[gnl->i + i] == '\n')
+		{
+			gnl->nl = 1;
+			i++;
 			break ;
-		bufferstring[counter] = '\0';
-		if (!staticholderstring)
-			staticholderstring = ft_strdup("");
-		holderstring = staticholderstring;
-		staticholderstring = ft_strjoin(holderstring, bufferstring);
-		free (holderstring);
-		holderstring = NULL;
-		if (ft_strchr(bufferstring, '\n'))
-			break ;
+		}
+		i++;
 	}
-	return (staticholderstring);
+	gnl->i += i;
+	return (ft_strsub(gnl->buf, gnl->i - i, i - gnl->nl));
 }
 
-/*
-** get_next_line
-** --------------------
-** Description:
-**   Reads lines from the file with file descriptor 'fd' using a static buffer and helper functions.
-**   Manages memory allocation for the buffer and the read lines.
-**   Returns each line of the file on successive calls until the end of the file is reached.
-**
-** Parameters:
-**   - fd: The file descriptor of the text file to read.
-**
-** Returns:
-**   - A pointer to the next line in the file.
-**   - Returns NULL on read error, end of file, or memory allocation failure.
-*/
-
-char	*get_next_line(int fd)
+static t_gnl	*get_gnl(t_list **lst, int fd)
 {
-	char			*bufferstring;
-	char			*thestringtoreturn;
-	static char		*staticholderstring;
+	t_gnl	*gnl;
+	t_list	*temp;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
-		return (0);
-	bufferstring = (char *)malloc(sizeof(char) * BUFFER_SIZE);
-	if (!bufferstring)
-		return (NULL);
-	thestringtoreturn = readtxtfile(fd, bufferstring, staticholderstring);
-	free(bufferstring);
-	bufferstring = NULL;
-	if (!thestringtoreturn)
-		return (NULL);
-	staticholderstring = chopatendofline(thestringtoreturn);
-	return (thestringtoreturn);
-}
-
-/*
-** main
-** --------------------
-** Description:
-**   Demonstrates the usage of the get_next_line function by reading and printing lines from a file.
-**
-** Returns:
-**   - 0 upon successful execution.
-*/
-
-int main()
-{
-	char *string;
-	int counter;
-
-	counter = 1;
-	int filedes = open("file.txt", O_RDONLY);
-	string = get_next_line(filedes);
-	while(string)
+	temp = *lst;
+	while (temp)
 	{
-		printf("%d :this is teh line %s", counter, string);
-		string = get_next_line(filedes);
-		counter++;
+		gnl = (t_gnl *)(temp->content);
+		if (gnl->fd == fd)
+			return (gnl);
+		temp = temp->next;
 	}
+	gnl = (t_gnl *)ft_memalloc(sizeof(t_gnl));
+	gnl->buf = ft_strnew(BUFF_SIZE);
+	gnl->count = BUFF_SIZE;
+	gnl->i = BUFF_SIZE;
+	gnl->fd = fd;
+	gnl->nl = 1;
+	temp = ft_lstnew(gnl, sizeof(t_gnl));
+	ft_memdel((void **)&gnl);
+	ft_lstadd(lst, temp);
+	return ((t_gnl *)(temp->content));
+}
+
+static void		del_gnl(t_list **lst, int fd, char **str)
+{
+	t_gnl	*gnl;
+	t_list	**temp;
+	t_list	*ptr;
+
+	temp = lst;
+	while (*temp)
+	{
+		gnl = (t_gnl *)((*temp)->content);
+		if (gnl->fd == fd)
+			break ;
+		*temp = ((*temp)->next);
+	}
+	if (*temp)
+	{
+		ptr = (*temp)->next;
+		ft_strdel(&(gnl->buf));
+		ft_memdel((void **)&gnl);
+		ft_memdel((void **)temp);
+		*temp = ptr;
+	}
+	ft_strdel(str);
+}
+
+static int		read_buffer(t_gnl *gnl, t_list **lst, char **temp, char **line)
+{
+	if (gnl->i == gnl->count)
+	{
+		gnl->count = read(gnl->fd, gnl->buf, BUFF_SIZE);
+		if (gnl->count == -1)
+		{
+			del_gnl(lst, gnl->fd, temp);
+			return (-1);
+		}
+		gnl->i = 0;
+		if (gnl->count == 0)
+		{
+			if (gnl->nl == 0)
+			{
+				*line = *temp;
+				return (1);
+			}
+		}
+	}
+	return (0);
+}
+
+int				get_next_line(int const fd, char **line)
+{
+	static t_list	*lst;
+	t_gnl			*gnl;
+	char			*temp;
+	int				ret;
+
+	if (fd < 0 || line == NULL)
+		return (-1);
+	gnl = get_gnl(&lst, fd);
+	temp = ft_strnew(0);
+	while (gnl->count > 0)
+	{
+		if ((ret = read_buffer(gnl, &lst, &temp, line)) != 0)
+			return (ret);
+		while (gnl->i < gnl->count)
+		{
+			temp = ft_strmerge(temp, get_append(gnl));
+			if (gnl->nl)
+			{
+				*line = temp;
+				return (1);
+			}
+		}
+	}
+	del_gnl(&lst, fd, &temp);
 	return (0);
 }

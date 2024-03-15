@@ -3,6 +3,13 @@
 # include <stdlib.h>
 # include <unistd.h>
 
+typedef struct	s_list
+{
+	void			*content;
+	size_t			content_size;
+	struct s_list	*next;
+}				t_list;
+
 int		ft_atoi(const char *str);
 void	ft_bzero(void *s, size_t n);
 void	*ft_calloc(size_t count, size_t size);
@@ -34,11 +41,26 @@ char	*ft_itoa(int n);
 char	*ft_strmapi(char const *s, char (*f)(unsigned int, char));
 void	ft_striteri(char *s, void (*f)(unsigned int, char*));
 void	ft_putchar_fd(char c, int fd);
-void	ft_putstr_fd(char *s, int fd);
-void	ft_putendl_fd(char *s, int fd);
+void	ft_putstr_fd(const char *s, int fd);
+void	ft_putendl_fd(const char *s, int fd);
 void	ft_putnbr_fd(int n, int fd);
 int		ft_countwords(char *str, char sep);
 char	*ft_strnew(size_t size);
 char	*ft_strsub(char const *s, unsigned int start, size_t len);
+void	ft_putendl(char const *s);
+void	ft_memdel(void **ap);
+t_list	*ft_lstnew(void const *content, size_t content_size);
+void	ft_lstadd(t_list **alst, t_list *new);
+void	ft_lstrev(t_list **alst);
+char	**ft_strsplit(char const *s, char c);
+int		ft_splitdel(char ***split);
+size_t	ft_lstcount(t_list *lst);
+void	*ft_memalloc(size_t size);
+double	ft_ilerp(double val, double first, double second);
+int		ft_abs(int i);
+int		ft_lerpi(int first, int second, double p);
+void	ft_strdel(char **as);
+char	*ft_strmerge(char *a, char *b);
+char	*ft_strnew(size_t size);
 
 #endif

@@ -39,6 +39,21 @@ SRCS	= 	ft_atoi.c \
 			ft_strsub.c \
 			ft_countwords.c \
 			get_next_line.c \
+			ft_putendl.c \
+			ft_memdel.c \
+			ft_lstnew.c \
+			ft_lstadd.c \
+			ft_lstrev.c \
+			ft_strsplit.c \
+			ft_splitdel.c \
+			ft_lstcount.c \
+			ft_memalloc.c \
+			ft_ilerp.c \
+			ft_abs.c \
+			ft_lerpi.c \
+			ft_strdel.c \
+			ft_strmerge.c \
+			ft_strnew.c \
 
 OBJS	= $(SRCS:%.c=%.o)
 

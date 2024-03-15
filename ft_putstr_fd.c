@@ -18,7 +18,7 @@
 **   - The length of the string is determined using 'ft_strlen'.
 */
 
-void	ft_putstr_fd(char *s, int fd)
+void	ft_putstr_fd(const char *s, int fd)
 {
 	write(fd, s, ft_strlen(s));
 }
